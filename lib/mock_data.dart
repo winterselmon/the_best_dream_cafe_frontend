@@ -11,58 +11,75 @@ enum MenuType {
 class Menu {
   final String? title;
   final MenuType? type;
+  final int? defaultPrice;
 
-  Menu({this.title, this.type});
+  Menu({
+    this.title,
+    this.type,
+    this.defaultPrice,
+  });
 }
 
 List<Menu> demoMenu = [
   Menu(
     title: "เอสเปรสโซ",
     type: MenuType.coffee,
+    defaultPrice: 40,
   ),
   Menu(
     title: "มอคค่า",
     type: MenuType.coffee,
+    defaultPrice: 40,
   ),
   Menu(
     title: "ลาเต้",
     type: MenuType.coffee,
+    defaultPrice: 40,
   ),
   Menu(
     title: "คาปูชิโน่",
     type: MenuType.coffee,
+    defaultPrice: 40,
   ),
   Menu(
     title: "ชาไทย",
     type: MenuType.tea,
+    defaultPrice: 40,
   ),
   Menu(
     title: "ชาเขียว",
     type: MenuType.tea,
+    defaultPrice: 40,
   ),
   Menu(
     title: "เอสเปรสโซ",
     type: MenuType.coffee,
+    defaultPrice: 40,
   ),
   Menu(
     title: "มอคค่า",
     type: MenuType.coffee,
+    defaultPrice: 40,
   ),
   Menu(
     title: "ลาเต้",
     type: MenuType.coffee,
+    defaultPrice: 40,
   ),
   Menu(
     title: "คาปูชิโน่",
     type: MenuType.coffee,
+    defaultPrice: 40,
   ),
   Menu(
     title: "ชาไทย",
     type: MenuType.tea,
+    defaultPrice: 40,
   ),
   Menu(
     title: "ชาเขียว",
     type: MenuType.tea,
+    defaultPrice: 40,
   ),
 ];
 

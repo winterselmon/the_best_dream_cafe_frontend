@@ -43,6 +43,7 @@ class DialogService {
                               callback(Menu(
                                 title: demoMenu[index].title,
                                 type: demoMenu[index].type,
+                                defaultPrice: demoMenu[index].defaultPrice,
                               ));
                               Navigator.pop(context);
                             },

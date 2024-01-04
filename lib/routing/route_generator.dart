@@ -2,7 +2,7 @@ import 'package:best_dream_cafe_frontend/presentation/pages/start/start_page.dar
 import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  final args = settings.arguments as dynamic;
+  // final args = settings.arguments as dynamic;
 
   switch (settings.name) {
     case StartPage.routeName:

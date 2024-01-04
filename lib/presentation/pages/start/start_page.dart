@@ -2,8 +2,9 @@ import 'package:best_dream_cafe_frontend/mock_data.dart';
 import 'package:best_dream_cafe_frontend/services/api/model/menu_item_model.dart';
 import 'package:best_dream_cafe_frontend/services/dialog_services.dart';
 import 'package:best_dream_cafe_frontend/utils/function_widgets.dart';
-import 'package:dotted_line/dotted_line.dart';
+import 'package:best_dream_cafe_frontend/utils/keyboard_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -17,16 +18,23 @@ class StartPage extends StatefulWidget {
 class _StartPageState extends State<StartPage> {
   late double height;
   late double width;
-  bool isAddItem = false;
+  double heightDetailContent = 40.0;
+  bool isAddItem = false, isRemove = false;
   String defaultMenu = 'เพิ่มเมนู';
   String menuName = '-', sweetLevel = '-', roastLevel = '-', specialty = '-';
+  int defaultPrice = 0;
   MenuType menuType = MenuType.empty;
   OrderDetailModel orderDetailModel = OrderDetailModel();
   List<OrderDetailModel> menuItemList = [];
+  final TextEditingController _priceController = TextEditingController();
+
+  TextStyle listTitleStyle = const TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w200,
+  );
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     menuName = defaultMenu;
   }
@@ -61,19 +69,21 @@ class _StartPageState extends State<StartPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                            border: Border.all(width: 1),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(16))),
-                        child: InkWell(
-                          onTap: () {
-                            isAddItem = true;
+                    InkWell(
+                      onTap: () {
+                        isAddItem = true;
 
-                            setState(() {});
-                          },
+                        closeKeyboard();
+
+                        setState(() {});
+                      },
+                      child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                              border: Border.all(width: 1),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(16))),
                           child: Row(
                             children: [
                               Image.asset(
@@ -89,8 +99,8 @@ class _StartPageState extends State<StartPage> {
                                 ),
                               ),
                             ],
-                          ),
-                        )),
+                          )),
+                    ),
                     addHorizontalSpace(10.0),
                   ],
                 ),
@@ -134,16 +144,22 @@ class _StartPageState extends State<StartPage> {
                                     (callback) {
                                       menuName = callback.title.toString();
                                       menuType = callback.type!;
+                                      defaultPrice = callback.defaultPrice!;
 
                                       roastLevel = '-';
                                       sweetLevel = '-';
                                       specialty = '-';
+                                      _priceController.text =
+                                          defaultPrice.toString();
+
+                                      closeKeyboard();
 
                                       setState(() {});
                                     },
                                   );
                                 },
                                 child: Container(
+                                  height: heightDetailContent,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
@@ -177,6 +193,7 @@ class _StartPageState extends State<StartPage> {
                                             );
                                           },
                                           child: Container(
+                                            height: heightDetailContent,
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 6),
                                             decoration: BoxDecoration(
@@ -213,6 +230,7 @@ class _StartPageState extends State<StartPage> {
                                             );
                                           },
                                           child: Container(
+                                            height: heightDetailContent,
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 6),
                                             decoration: BoxDecoration(
@@ -245,12 +263,55 @@ class _StartPageState extends State<StartPage> {
                                   );
                                 },
                                 child: Container(
+                                  height: heightDetailContent,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
                                     border: Border.all(width: 1),
                                   ),
                                   child: Text(sweetLevel),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        addVerticalSpace(10.0),
+                        Row(
+                          children: [
+                            const Expanded(
+                              flex: 1,
+                              child: Text('ราคา : '),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: Container(
+                                height: heightDetailContent,
+                                // padding: const EdgeInsets.symmetric(
+                                //     horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 1),
+                                ),
+                                child: TextFormField(
+                                  controller: _priceController,
+                                  textInputAction: TextInputAction.done,
+                                  maxLength: 4,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'[0-9]')),
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  onFieldSubmitted: (value) {
+                                    closeKeyboard();
+                                  },
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    counterText: '',
+                                    hintText: 'ราคา',
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 8),
+                                  ),
                                 ),
                               ),
                             )
@@ -276,8 +337,16 @@ class _StartPageState extends State<StartPage> {
                                       isAddItem = false;
 
                                       orderDetailModel = OrderDetailModel(
-                                          name: menuName,
-                                          sweetLevel: sweetLevel);
+                                        name: menuName,
+                                        sweetLevel: sweetLevel,
+                                        specialty: menuType == MenuType.coffee
+                                            ? specialty
+                                            : '',
+                                        roastLevel: menuType == MenuType.coffee
+                                            ? roastLevel
+                                            : '',
+                                        price: _priceController.text,
+                                      );
 
                                       menuItemList.add(orderDetailModel);
 
@@ -285,6 +354,8 @@ class _StartPageState extends State<StartPage> {
                                       sweetLevel = '-';
                                       specialty = '-';
                                       roastLevel = '-';
+                                      _priceController.clear();
+                                      menuType = MenuType.empty;
 
                                       setState(() {});
                                     }
@@ -321,31 +392,151 @@ class _StartPageState extends State<StartPage> {
                 children: [
                   const Text(
                     'รายการ',
-                    style: TextStyle(fontSize: 16.0),
+                    style: TextStyle(fontSize: 18.0),
                   ),
-                  addVerticalSpace(20.0),
+                  addVerticalSpace(16.0),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        menuItemList.isNotEmpty
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      isRemove = !isRemove;
+                                      setState(() {});
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 14, vertical: 8),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(width: 1),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(16))),
+                                      child: Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/img_remove.png',
+                                            width: 14,
+                                            height: 14,
+                                          ),
+                                          addHorizontalSpace(10),
+                                          const Text(
+                                            'ลบรายการ',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Container(),
+                      ],
+                    ),
+                  ),
+                  addVerticalSpace(16.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'เมนู',
+                            style: listTitleStyle,
+                          ),
+                        ),
+                        addHorizontalSpace(10.0),
+                        Expanded(
+                          child: Text(
+                            'ระดับความหวาน',
+                            style: listTitleStyle,
+                          ),
+                        ),
+                        addHorizontalSpace(10.0),
+                        Expanded(
+                          child: Text(
+                            'เมล็ดพิเศษ',
+                            style: listTitleStyle,
+                          ),
+                        ),
+                        addHorizontalSpace(10.0),
+                        Expanded(
+                          child: Text(
+                            'ระดับคั่ว',
+                            style: listTitleStyle,
+                          ),
+                        ),
+                        addHorizontalSpace(10.0),
+                        Expanded(
+                          child: Text(
+                            'ราคา',
+                            style: listTitleStyle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  addVerticalSpace(10.0),
                   ListView.separated(
                     shrinkWrap: true,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemBuilder: (context, index) {
-                      return Container(
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Text(menuItemList[index].name.toString()),
-                                addHorizontalSpace(10.0),
-                                Text(menuItemList[index].sweetLevel.toString()),
-                              ],
-                            ),
+                      return Column(
+                        children: [
+                          if (index == 0) ...[
                             addVerticalSpace(5.0),
                             Container(
                               height: 1,
                               width: width,
                               color: Colors.black,
-                            )
+                            ),
+                            addVerticalSpace(5.0),
                           ],
-                        ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  menuItemList[index].name.toString(),
+                                ),
+                              ),
+                              addHorizontalSpace(10.0),
+                              Expanded(
+                                child: Text(
+                                  menuItemList[index].sweetLevel.toString(),
+                                ),
+                              ),
+                              addHorizontalSpace(10.0),
+                              Expanded(
+                                child: Text(
+                                  menuItemList[index].specialty.toString(),
+                                ),
+                              ),
+                              addHorizontalSpace(10.0),
+                              Expanded(
+                                child: Text(
+                                  menuItemList[index].roastLevel.toString(),
+                                ),
+                              ),
+                              addHorizontalSpace(10.0),
+                              Expanded(
+                                child: Text(
+                                  menuItemList[index].price.toString(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          addVerticalSpace(6.0),
+                          Container(
+                            height: 1,
+                            width: width,
+                            color: Colors.black,
+                          )
+                        ],
                       );
                     },
                     separatorBuilder: (context, index) => const SizedBox(
